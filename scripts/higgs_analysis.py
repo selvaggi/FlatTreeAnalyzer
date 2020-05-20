@@ -47,6 +47,28 @@ colors.append(ROOT.kYellow+2);
 colors.append(ROOT.kMagenta+1);
 
 
+ratio = dict()
+ratio[25.00 ] = 1.695
+ratio[50.000] = 1.741
+ratio[75.000] = 1.777
+ratio[100.00] = 1.812
+ratio[125.00] = 1.846
+ratio[150.00] = 1.879
+ratio[175.00] = 1.912
+ratio[200.00] = 1.945
+ratio[225.00] = 1.976
+ratio[250.00] = 2.009
+ratio[275.00] = 2.040
+ratio[300.00] = 2.072
+ratio[325.00] = 2.102
+ratio[350.00] = 2.132
+ratio[375.00] = 2.161
+ratio[400.00] = 2.190
+ratio[425.00] = 2.218
+ratio[450.00] = 2.246
+ratio[475.00] = 2.273
+ratio[500.00] = 2.300
+ratio[525.00] = 2.326
 
 #_____________________________________________________________________________
 def options():
@@ -63,6 +85,8 @@ def options():
     parser.add_argument('--outdir', dest='outdir', type=str, default='')
     parser.add_argument('--ptmax', dest='ptmax', type=float, default=500.)
 
+    parser.add_argument('--sqrts', dest='sqrts', type=int, default=100)
+
     return parser.parse_args()
 
 #______________________________________________________________________________
@@ -75,10 +99,25 @@ def main():
     uncertainties.append((0., 1., 0.)) # signal eff + stat
     uncertainties.append((0.01, 1., 0.)) # lumi+prod + signal eff (x1) + stat'''
 
-    uncertainties = dict()
-    uncertainties[(0., 0., 0.)] = 'stat. only'
-    uncertainties[(0., 1., 0.)] = 'stat. + syst.'
+    uncertainties = collections.OrderedDict()
     uncertainties[(0.01, 1., 0.)] = 'stat. + syst. + lumi'
+    uncertainties[(0., 1., 0.)] = 'stat. + syst.'
+    uncertainties[(0., 0., 0.)] = 'stat. only'
+
+    colstr = ''
+    dirstr = ''
+
+    if args.sqrts == 100:
+        colstr = 'FCC'
+        dirstr = 'fcc'
+
+    if args.sqrts == 27:
+        colstr = 'HELHC'
+        dirstr = 'helhc'
+
+    if args.sqrts == 37:
+        colstr = 'HELHC'
+        dirstr = 'helhc'
 
     # optional, do ratio only if arguments with label 2 are specified
     if len(args.param2) > 0:
@@ -98,12 +137,13 @@ def main():
 
     
     # combination 
-   
-    elif args.indir1 == 'h4l':
+
+    #elif args.indir1 == 'h4l':
+    elif 'h4l' in args.indir1:
         
-        param1, rdir1, hfile1, processes1 = parameters('templates/FCC/h4mu.py', 'h4mu')
-        param2, rdir2, hfile2, processes2 = parameters('templates/FCC/h4e.py', 'h4e')
-        param3, rdir3, hfile3, processes3 = parameters('templates/FCC/h2e2mu.py', 'h2e2mu')
+        param1, rdir1, hfile1, processes1 = parameters('templates/{}/h4mu.py'.format(colstr), 'h4mu_{}'.format(dirstr))
+        param2, rdir2, hfile2, processes2 = parameters('templates/{}/h4e.py'.format(colstr), 'h4e_{}'.format(dirstr))
+        param3, rdir3, hfile3, processes3 = parameters('templates/{}/h2e2mu.py'.format(colstr), 'h2e2mu_{}'.format(dirstr))
 
         electrons1, muons1, photons1 = objects(['m1','m2','m3','m4'])
         electrons2, muons2, photons2 = objects(['e1','e2','e3','e4'])
@@ -131,10 +171,11 @@ def main():
 
         produceYieldPlots(param, dicts, uncertainties, args.outdir, label, args.ptmax)
         
-    elif args.indir1 == 'hlla':
-        
-        param1, rdir1, hfile1, processes1 = parameters('templates/FCC/hmumua.py', 'hmumua')
-        param2, rdir2, hfile2, processes2 = parameters('templates/FCC/heea.py', 'heea')
+    #elif args.indir1 == 'hlla':
+    elif 'hlla' in args.indir1:
+       
+        param1, rdir1, hfile1, processes1 = parameters('templates/{}/hmumua.py'.format(colstr), 'hmumua_{}'.format(dirstr))
+        param2, rdir2, hfile2, processes2 = parameters('templates/{}/heea.py'.format(colstr), 'heea_{}'.format(dirstr))
 
         electrons1, muons1, photons1 = objects(['m1','m2','a'])
         electrons2, muons2, photons2 = objects(['e1','e2','a'])
@@ -161,6 +202,8 @@ def main():
         electrons1, muons1, photons1 = objects(args.objlist1)
         dicts1 = produceDicts(param1, hfile1, electrons1, muons1, photons1)
 
+        print 'here'
+
         dicts = []
         dicts.append(dicts1)
  
@@ -180,6 +223,7 @@ def objects(objlist):
 #_____________________________________________________________________________________________________
 def produceLabel(indir):
     label = ''
+    '''
     if   indir == 'haa'      : label = 'H #rightarrow #gamma#gamma'
     elif indir == 'hmumu'    : label = 'H #rightarrow #mu#mu'
     elif indir == 'h4mu'     : label = 'H #rightarrow #mu#mu#mu#mu'   
@@ -187,10 +231,19 @@ def produceLabel(indir):
     elif indir == 'h4e'      : label = 'H #rightarrow eeee'   
     elif indir == 'hmumua'   : label = 'H #rightarrow #mu#mu#gamma'   
     elif indir == 'heea'     : label = 'H #rightarrow ee#gamma'   
-    elif indir == 'h4l'      : label = 'H #rightarrow 4#ell, #ell=e/#mu'   
-    elif indir == 'hlla'     : label = 'H #rightarrow #ell#ell#gamma, #ell=e/#mu'
+    elif indir == 'h4l'      : label = 'H #rightarrow 4l, l=e/#mu'   
+    elif indir == 'hlla'     : label = 'H #rightarrow ll#gamma, l=e/#mu'
+    '''
+    if   'haa_'     in indir : label = 'H #rightarrow #gamma#gamma'
+    elif 'hmumu_'   in indir : label = 'H #rightarrow #mu#mu'
+    elif 'h4mu_'    in indir : label = 'H #rightarrow #mu#mu#mu#mu'
+    elif 'h2e2mu_'  in indir : label = 'H #rightarrow ee#mu#mu'
+    elif 'h4e_'     in indir : label = 'H #rightarrow eeee'
+    elif 'hmumua_'  in indir : label = 'H #rightarrow #mu#mu#gamma'
+    elif 'heea_'    in indir : label = 'H #rightarrow ee#gamma'
+    elif 'h4l_'     in indir : label = 'H #rightarrow 4l, l=e/#mu'
+    elif 'hlla_'    in indir : label = 'H #rightarrow ll#gamma, l=e/#mu'
     return label
-
 
 #_____________________________________________________________________________________________________
 def parameters(param, indir):
@@ -200,6 +253,7 @@ def parameters(param, indir):
     module_dir = os.path.dirname(module_path)
     base_name = os.path.splitext(ntpath.basename(paramFile))[0]
     sys.path.insert(0, module_dir)
+    print base_name
     param = importlib.import_module(base_name)
     rdir = "{}/root_H_125/".format(indir)
     hfile = ROOT.TFile("{}/histos.root".format(rdir))
@@ -216,7 +270,6 @@ def obj_err(objlist, hfile, selstr):
         hname = 'H(125)_{}_{}'.format(selstr,varpt)
         h = hfile.Get(hname)
         mean = h.GetMean()
-        #print objstr, 'pt', mean, 'delta', delta_eff(objstr, mean)
 
         # assume correlated errors for the same object, cannot add in quadrature
         delta_eff_obj +=  delta_eff(objstr, mean)
@@ -264,7 +317,6 @@ def produceDicts(param, hfile, electrons, muons, photons):
             pho_errors[cut] = obj_err(photons, hfile, selstr)
 
             #delta_eff_tot = math.sqrt(err_ele**2 + err_muo**2 + err_pho**2)
-
             #print cut, ele_errors[cut], muo_errors[cut], pho_errors[cut]
 
             b = 0
@@ -351,6 +403,15 @@ def produceYieldPlots(param, dicts, uncertainties, fname, label, ptmax):
     mindmu = 999
 
     nsel = 0
+    
+    minpt = dict()
+    minss = dict()
+    
+
+    for unc, tit in uncertainties.iteritems():
+        minpt[unc] = 999.
+        minss[unc] = 999.
+
     for cut in dicts[0][0].keys():
 
         #print s, b
@@ -384,6 +445,11 @@ def produceYieldPlots(param, dicts, uncertainties, fname, label, ptmax):
             s_i = s_yields[cut]
             b_i = b_yields[cut]
 
+            args = options()
+            if args.sqrts == 37:
+                s_i *= ratio[cut]
+                b_i *= ratio[cut]
+
             #sigma_eff_i = unc[1]*delta_eff_i
 
             #sig_unc_i = math.sqrt(unc[0]**2 + sigma_eff_i**2)
@@ -400,8 +466,8 @@ def produceYieldPlots(param, dicts, uncertainties, fname, label, ptmax):
             deltas_s   += sig_unc_i*s_i
             deltas_s_2 += (sig_unc_i*s_i)**2
             
-	    #print '{:.0f}, {:.0f}, {:.3f}, {:.0f}'.format(s_i, b_i, sig_unc_i, sig_unc_i*s_i)
-	    
+            #print '{:.0f}, {:.0f}, {:.3f}, {:.0f}'.format(s_i, b_i, sig_unc_i, sig_unc_i*s_i)
+            
             deltab_b   += bkg_unc_i*b_i
             deltab_b_2 += (bkg_unc_i*b_i)**2
 
@@ -433,7 +499,7 @@ def produceYieldPlots(param, dicts, uncertainties, fname, label, ptmax):
                 bkg_unc = math.sqrt(deltab_b_2/b_2)
 
             
-	    '''# aggro case, un-correlated sum --> sigma_s * s = sqrt( Sum (sigma_i * s_i)^2
+            '''# aggro case, un-correlated sum --> sigma_s * s = sqrt( Sum (sigma_i * s_i)^2
             if s > 0 and b > 0:
                 sig_unc = math.sqrt(deltas_s_2/s_2)
                 bkg_unc = math.sqrt(deltab_b_2/b_2)'''
@@ -441,18 +507,25 @@ def produceYieldPlots(param, dicts, uncertainties, fname, label, ptmax):
 
 
             # rescale by various uncertainty assumptions
-	    sig_unc = math.sqrt(unc[0]**2 + (unc[1]*sig_unc)**2)
-	    bkg_unc = math.sqrt(unc[2]**2)
+            sig_unc = math.sqrt(unc[0]**2 + (unc[1]*sig_unc)**2)
+            bkg_unc = math.sqrt(unc[2]**2)
 
             sign = significance(s, sig_unc, b, bkg_unc)
             rel_unc = dMuOverMu(s, sig_unc, b, bkg_unc)
 
 
             if float(cut) <= ptmax:
-        	if sign < minsig : minsig = sign 
-        	if sign > maxsig : maxsig = sign
-        	if rel_unc < mindmu : mindmu = rel_unc
-        	if rel_unc > maxdmu : maxdmu = rel_unc
+                if sign < minsig : minsig = sign 
+                if sign > maxsig : maxsig = sign
+                if rel_unc < mindmu : mindmu = rel_unc
+                if rel_unc > maxdmu : maxdmu = rel_unc
+
+
+            if rel_unc < minss[unc]:
+                minss[unc] = rel_unc
+                minpt[unc] = cut
+
+            #print unc, cut, rel_unc
 
             grs_sign[index].SetPoint(nsel,cut,sign)
             grs_dmu[index].SetPoint(nsel,cut,rel_unc)
@@ -467,14 +540,39 @@ def produceYieldPlots(param, dicts, uncertainties, fname, label, ptmax):
 
     intLumiab = param[0].intLumi/1e+06 
 
-    lt = "FCC-hh Simulation (Delphes)"
-    rt = "#sqrt{{s}} = 100 TeV, L = {:.0f}  ab^{{-1}}, {}".format(intLumiab, label)
+    args = options()
+    if args.sqrts == 100:
+        collabel = 'FCC-hh'
+        sqrtslabel = args.sqrts
+       
+    if args.sqrts == 27:
+        collabel = 'HE-LHC'
+        sqrtslabel = args.sqrts
 
-    drawMultiGraph(mg_sign, 'sign', lt, rt, fname, minsig/2., maxsig*4., ptmax, True)
+    if args.sqrts == 37:
+        collabel = 'VHE-LHC'
+        sqrtslabel = 37.5
+
+
+    lt = "{} Simulation (Delphes)".format(collabel)
+    rt = "#sqrt{{s}} = {} TeV, L = {:.0f}  ab^{{-1}}, {}".format(sqrtslabel, intLumiab, label)
+
+
+    drawMultiGraph(mg_sign, 'sign', lt, rt, fname, minsig/2., maxsig*10., ptmax, True)
     #drawMultiGraph(mg_dmu, 'optim_dmu', lt, rt, fname , mindmu/2., maxdmu*4., ptmax, True)
-    drawMultiGraph(mg_dmu, 'dmu', lt, rt, fname , 0.1, 50., ptmax, True)
+    drawMultiGraph(mg_dmu, 'dmu', lt, rt, fname , mindmu/4., maxdmu*10., ptmax, True)
     drawMultiGraph(gr_sb, 'sb', lt, rt, fname, minsb/2., maxsb*2., ptmax, True,  False)
+
+
+    # print summary
+    for unc, tit in uncertainties.iteritems():
+        print '{}: {:.2f}'.format(tit, minss[unc])
+
+
     print 'DONE'
+
+
+
 
 
 #_____________________________________________________________________________________________________
@@ -499,6 +597,11 @@ def produceRatioPlot(param1, dicts1, label1, param2, dicts2, label2, fname, ptma
     uncertainties.append((1., 2.)) # syst (cons) + stat
     uncertainties.append((1., 1.)) # syst (agg) + stat
     uncertainties.append((1., 0.)) # stat only
+
+    uncs = collections.OrderedDict()
+    uncs[(1., 2.)] = 'stat + syst (cons.)' # syst (cons) + stat
+    uncs[(1., 1.)] = 'stat + syst (optim.)' # syst (agg) + stat
+    uncs[(1., 0.)] = 'stat. only' # stat only
 
     index = 0
     for unc in uncertainties:
@@ -529,16 +632,30 @@ def produceRatioPlot(param1, dicts1, label1, param2, dicts2, label2, fname, ptma
     s_yields2 = dicts2[3] 
     b_yields2 = dicts2[4]
 
+    minpt = dict()
+    minss = dict()
+
+    for unc in uncertainties:
+        minpt[unc] = 999.
+        minss[unc] = 999.
+
     nsel = 0
     for cut in dicts1[0].keys():
 
         nsel += 1
         index = 0
-        
+
         s1 = s_yields1[cut]
         b1 = b_yields1[cut]
         s2 = s_yields2[cut]
         b2 = b_yields2[cut]
+
+        args = options()
+        if args.sqrts == 37:
+            s1 *= ratio[cut]
+            b1 *= ratio[cut]
+            s2 *= ratio[cut]
+            b2 *= ratio[cut]
 
         de1 = ele_errors1[cut]
         de2 = ele_errors2[cut]
@@ -557,9 +674,7 @@ def produceRatioPlot(param1, dicts1, label1, param2, dicts2, label2, fname, ptma
 
         # add in quadrature efficiency and stat. uncertainty
         #toterr = math.sqrt(delta_eff_tot**2 + delta_stat1**2 + delta_stat2**2)
-
         #print cut, s1, b1, s2, b2
-
 
         for unc in uncertainties:
             
@@ -576,11 +691,14 @@ def produceRatioPlot(param1, dicts1, label1, param2, dicts2, label2, fname, ptma
 
             grs_dr[index].SetPoint(nsel,cut,toterr)
 
+            if toterr < minss[unc]:
+                minss[unc] = toterr
+                minpt[unc] = cut
+
             if toterr < mindr : mindr = toterr
             if toterr > maxdr : maxdr = toterr
 
             grs_dr[index].SetTitle(title)
-
             index += 1
 
     index = 0
@@ -592,13 +710,30 @@ def produceRatioPlot(param1, dicts1, label1, param2, dicts2, label2, fname, ptma
 
     #ratiolabel = ratiolabel.replace('#','\\')
 
-    lt = "FCC-hh Simulation (Delphes)"
-    rt = "#sqrt{{s}} = 100 TeV, L = {:.0f}  ab^{{-1}}".format(intLumiab)
-    rt += ', {}'.format(ratiolabel)
+    args = options()
+    if args.sqrts == 100:
+        collabel = 'FCC-hh'
+        sqrtslabel = args.sqrts
+       
+    if args.sqrts == 27:
+        collabel = 'HE-LHC'
+        sqrtslabel = args.sqrts
 
+    if args.sqrts == 37:
+        collabel = 'VHE-LHC'
+        sqrtslabel = 37.5
+
+    lt = "{} Simulation (Delphes)".format(collabel)
+    rt = "#sqrt{{s}} = {} TeV, L = {:.0f}  ab^{{-1}}".format(sqrtslabel,intLumiab)
+    rt += ', {}'.format(ratiolabel)
 
     drawMultiGraph(mg_dr, 'ratio', lt, rt, fname , mindr/10., maxdr*10., ptmax, True)
     print 'DONE'
+
+    # print summary
+    for unc in uncertainties:
+        print '{}: {:.2f}'.format(uncs[unc], minss[unc])
+
 
 #_____________________________________________________________________________________________________
 def drawMultiGraph(mg, title, lt, rt, fname, ymin, ymax, ptmax, log, bl = True):
@@ -680,14 +815,14 @@ def drawMultiGraph(mg, title, lt, rt, fname, ymin, ymax, ptmax, log, bl = True):
     if len(rt)>2:
         text = '#it{#bf{' + rt[2] +'}}'
         if 'ell' in text:
-	   text = text.replace('#','\\')
-	Text.SetTextSize(0.05) 
+           text = text.replace('#','\\')
+        Text.SetTextSize(0.05) 
         Text.DrawLatex(0.69, 0.27, text)
 
     if len(rt)>3:
         text = '#it{#bf{' + rt[3] +'}}'
         if 'ell' in text:
-	   text = text.replace('#','\\')
+           text = text.replace('#','\\')
         Text.SetTextSize(0.04) 
         Text.DrawLatex(0.71, 0.20, text)
 
@@ -705,8 +840,8 @@ def drawMultiGraph(mg, title, lt, rt, fname, ymin, ymax, ptmax, log, bl = True):
     
     if not os.path.exists(pdir):
        os.makedirs(pdir)
-    canvas.Print('{}.png'.format(filename), 'png')
     canvas.Print('{}.pdf'.format(filename), 'pdf')
+    canvas.Print('{}.png'.format(filename), 'png')
 #____________________________________________________
 def myStyle():
     import ROOT

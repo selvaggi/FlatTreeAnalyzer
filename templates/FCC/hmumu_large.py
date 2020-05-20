@@ -68,7 +68,7 @@ selbase_nomasscut = ('mu2_pt > 20. && mu1_eta < 4 && mu2_eta < 4 &&'
 selbase_masscut = ('mu2_pt > 20. && mu1_eta < 4 && mu2_eta < 4 &&'
             'nbjets == 0 &&'
             'met_pt < 50 &&'
-            'higgs_m > 124 && higgs_m < 126')
+            'higgs_m > 123 && higgs_m < 127')
 
 selections = collections.OrderedDict()
 selections['H(125)'] = []

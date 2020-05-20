@@ -6,7 +6,7 @@ variables = {
     "pth":{"name":"higgs_pt","title":"p_{T}^{H} [GeV]","bin":100,"xmin":50,"xmax":1000},
     "pthl":{"name":"higgs_pt","title":"p_{T}^{H} [GeV]","bin":100,"xmin":0,"xmax":2000},
     "mhl":{"name":"higgs_m","title":"m_{H} [GeV]","bin":100,"xmin":50,"xmax":2000},
-    "mh":{"name":"higgs_m","title":"m_{H} [GeV]","bin":100,"xmin":110,"xmax":140},
+    "mh":{"name":"higgs_m","title":"m_{H} [GeV]","bin":50,"xmin":110,"xmax":140},
     "ptm1":{"name":"mu1_pt","title":"p_{T}^{max}(#mu) [GeV]","bin":100,"xmin":0,"xmax":1000},
     "ptm2":{"name":"mu2_pt","title":"p_{T}^{min}(#mu) [GeV]","bin":100,"xmin":0,"xmax":1000},
 }
@@ -57,8 +57,8 @@ uncertainties.append([0.02, 0.001])
 uncertainties.append([0.02, 0.01])
 
 # the first time needs to be set to True
-runFull = True
-#runFull = False
+#runFull = True
+runFull = False
 
 # base selections
 selbase_nomasscut = ('mu2_pt > 20. && mu1_eta < 4 && mu2_eta < 4 &&'
@@ -68,7 +68,7 @@ selbase_nomasscut = ('mu2_pt > 20. && mu1_eta < 4 && mu2_eta < 4 &&'
 selbase_masscut = ('mu2_pt > 20. && mu1_eta < 4 && mu2_eta < 4 &&'
             'nbjets == 0 &&'
             'met_pt < 50 &&'
-            'higgs_m > 124 && higgs_m < 126')
+            'higgs_m > 124.5 && higgs_m < 125.5')
 
 selections = collections.OrderedDict()
 selections['H(125)'] = []

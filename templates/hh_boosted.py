@@ -5,7 +5,7 @@ import collections
 variables = {
     "h1_m":{"name":"softDropped_bJet1_m","title":"m_{j}^{(1)} [GeV]","bin":100,"xmin":0.0,"xmax":200.0},
     "h2_m":{"name":"softDropped_bJet2_m","title":"m_{j}^{(2)} [GeV]","bin":100,"xmin":0.0,"xmax":200.0},
-    "hh_m":{"name":"hh_m","title":"m_{HH} [GeV]","bin":30,"xmin":250.0,"xmax":2000.0},
+    "hh_m":{"name":"hh_m","title":"m_{HH} [GeV]","bin":60,"xmin":100.0,"xmax":2500.0},
     "hhgen_m":{"name":"hh_gen_m","title":"m_{HH} (gen) [GeV]","bin":100,"xmin":100.0,"xmax":2500.0},
     "hh_pt":{"name":"hh_pt","title":"p_{T,HH} [GeV]","bin":100,"xmin":250.0,"xmax":3000.0},
     'h1_tau21':{'name':'bJet1_tau21','title':'#tau_{2,1} (j^{(1)})','bin':100,'xmin':0.0,'xmax':1.0},
@@ -29,54 +29,55 @@ variables2D = {
 
 colors = {}
 
-colors['HH(#kappa_{l}=0.50)'] = ROOT.kRed
-colors['HH(#kappa_{l}=0.90)'] = ROOT.kRed
-colors['HH(#kappa_{l}=0.95)'] = ROOT.kRed
-colors['HH(#kappa_{l}=1.00)'] = ROOT.kRed
-colors['HH(#kappa_{l}=1.05)'] = ROOT.kRed
-colors['HH(#kappa_{l}=1.10)'] = ROOT.kRed
-colors['HH(#kappa_{l}=1.50)'] = ROOT.kRed
-colors['HH(#kappa_{l}=2.00)'] = ROOT.kRed
+colors['HH(#kappa_{l}=0.50)'] = ROOT.kBlack
+#colors['HH(#kappa_{l}=0.90)'] = ROOT.kRed
+#colors['HH(#kappa_{l}=0.95)'] = ROOT.kRed
+colors['HH(#kappa_{l}=1.00)'] = ROOT.kBlack
+#colors['HH(#kappa_{l}=1.05)'] = ROOT.kRed
+#colors['HH(#kappa_{l}=1.10)'] = ROOT.kRed
+#colors['HH(#kappa_{l}=1.50)'] = ROOT.kRed
+colors['HH(#kappa_{l}=2.00)'] = ROOT.kBlack
 
 '''colors['EWK'] = ROOT.kAzure+5
 colors['QCD+EWK'] = ROOT.kAzure+3
 colors['QCD'] = ROOT.kAzure+1
 '''
 
+colors['QCD'] = ROOT.kRed+1
+colors['QCD+EWK'] = ROOT.kCyan+2
 colors['EWK'] = ROOT.kGreen+1
-colors['QCD+EWK'] = ROOT.kCyan-8
-colors['QCD'] = ROOT.kAzure+1
+
+
 
 signal_groups = collections.OrderedDict()
 
 signal_groups['HH(#kappa_{l}=0.50)'] = ['mgp8_pp_hhj_lambda050_5f_hhbbbb']
-signal_groups['HH(#kappa_{l}=0.90)'] = ['mgp8_pp_hhj_lambda090_5f_hhbbbb']
-signal_groups['HH(#kappa_{l}=0.95)'] = ['mgp8_pp_hhj_lambda095_5f_hhbbbb']
+#signal_groups['HH(#kappa_{l}=0.90)'] = ['mgp8_pp_hhj_lambda090_5f_hhbbbb']
+#signal_groups['HH(#kappa_{l}=0.95)'] = ['mgp8_pp_hhj_lambda095_5f_hhbbbb']
 signal_groups['HH(#kappa_{l}=1.00)'] = ['mgp8_pp_hhj_lambda100_5f_hhbbbb']
-signal_groups['HH(#kappa_{l}=1.05)'] = ['mgp8_pp_hhj_lambda105_5f_hhbbbb']
-signal_groups['HH(#kappa_{l}=1.10)'] = ['mgp8_pp_hhj_lambda110_5f_hhbbbb']
-signal_groups['HH(#kappa_{l}=1.50)'] = ['mgp8_pp_hhj_lambda150_5f_hhbbbb']
+#signal_groups['HH(#kappa_{l}=1.05)'] = ['mgp8_pp_hhj_lambda105_5f_hhbbbb']
+#signal_groups['HH(#kappa_{l}=1.10)'] = ['mgp8_pp_hhj_lambda110_5f_hhbbbb']
+#signal_groups['HH(#kappa_{l}=1.50)'] = ['mgp8_pp_hhj_lambda150_5f_hhbbbb']
 signal_groups['HH(#kappa_{l}=2.00)'] = ['mgp8_pp_hhj_lambda200_5f_hhbbbb']
 
 background_groups = collections.OrderedDict()
 
 
-background_groups['EWK'] = [
-                            'mgp8_pp_bbbbj_QED',
-                           ]
-                           
-background_groups['QCD+EWK'] = [
-                            'mgp8_pp_bbbbj_QCDQED',
-                           ]
-                           
 background_groups['QCD'] = [
                             'mgp8_pp_bbbbj_QCD',
                            ]
 
+background_groups['QCD+EWK'] = [
+                            'mgp8_pp_bbbbj_QCDQED',
+                           ]
+                           
+background_groups['EWK'] = [
+                            'mgp8_pp_bbbbj_QED',
+                           ]
+                           
 
 # global parameters
 intLumi = 30000000
-#intLumi = 1000000
 
 delphesVersion = '3.4.2'
 
@@ -87,7 +88,6 @@ uncertainties.append([0.01, 0.01])
 
 # the first time needs to be set to True
 runFull = True
-#runFull = False
 
 # base pre-selections
 
@@ -107,21 +107,22 @@ selection2 += ' && softDropped_bJet2_m. < 135. && softDropped_bJet2_m. > 100.'
 selections = collections.OrderedDict()
 
 selections['HH(#kappa_{l}=0.50)'] = []
-selections['HH(#kappa_{l}=0.90)'] = []
-selections['HH(#kappa_{l}=0.95)'] = []
+#selections['HH(#kappa_{l}=0.90)'] = []
+#selections['HH(#kappa_{l}=0.95)'] = []
 selections['HH(#kappa_{l}=1.00)'] = []
-selections['HH(#kappa_{l}=1.05)'] = []
-selections['HH(#kappa_{l}=1.10)'] = []
-selections['HH(#kappa_{l}=1.50)'] = []
+#selections['HH(#kappa_{l}=1.05)'] = []
+#selections['HH(#kappa_{l}=1.10)'] = []
+#selections['HH(#kappa_{l}=1.50)'] = []
 selections['HH(#kappa_{l}=2.00)'] = []
 
 selections['HH(#kappa_{l}=0.50)'].append(selbase)
-selections['HH(#kappa_{l}=0.90)'].append(selbase)
-selections['HH(#kappa_{l}=0.95)'].append(selbase)
+#selections['HH(#kappa_{l}=0.90)'].append(selbase)
+#selections['HH(#kappa_{l}=0.95)'].append(selbase)
 selections['HH(#kappa_{l}=1.00)'].append(selbase)
-selections['HH(#kappa_{l}=1.05)'].append(selbase)
-selections['HH(#kappa_{l}=1.10)'].append(selbase)
-selections['HH(#kappa_{l}=1.50)'].append(selbase)
+#selections['HH(#kappa_{l}=1.05)'].append(selbase)
+#selections['HH(#kappa_{l}=1.10)'].append(selbase)
+#selections['HH(#kappa_{l}=1.50)'].append(selbase)
+#selections['HH(#kappa_{l}=1.50)'].append(selbase)
 selections['HH(#kappa_{l}=2.00)'].append(selbase)
 
 
@@ -135,12 +136,12 @@ for i in xrange(3):
    
    ptstr = ' && bJet1_pt > {} && bJet2_pt > {} '.format(pt1, pt2)
    selections['HH(#kappa_{l}=0.50)'].append(selection + ptstr)
-   selections['HH(#kappa_{l}=0.90)'].append(selection + ptstr)
-   selections['HH(#kappa_{l}=0.95)'].append(selection + ptstr)
+   #selections['HH(#kappa_{l}=0.90)'].append(selection + ptstr)
+   #selections['HH(#kappa_{l}=0.95)'].append(selection + ptstr)
    selections['HH(#kappa_{l}=1.00)'].append(selection + ptstr)
-   selections['HH(#kappa_{l}=1.05)'].append(selection + ptstr)
-   selections['HH(#kappa_{l}=1.10)'].append(selection + ptstr)
-   selections['HH(#kappa_{l}=1.50)'].append(selection + ptstr)
+   #selections['HH(#kappa_{l}=1.05)'].append(selection + ptstr)
+   #selections['HH(#kappa_{l}=1.10)'].append(selection + ptstr)
+   #selections['HH(#kappa_{l}=1.50)'].append(selection + ptstr)
    selections['HH(#kappa_{l}=2.00)'].append(selection + ptstr)
 
 for i in xrange(3):
@@ -149,12 +150,12 @@ for i in xrange(3):
    pt2 = 200. +float(i*50.)
    ptstr = ' && bJet1_pt > {} && bJet2_pt > {} '.format(pt1, pt2)
    selections['HH(#kappa_{l}=0.50)'].append(selection2 + ptstr)
-   selections['HH(#kappa_{l}=0.90)'].append(selection2 + ptstr)
-   selections['HH(#kappa_{l}=0.95)'].append(selection2 + ptstr)
+   #selections['HH(#kappa_{l}=0.90)'].append(selection2 + ptstr)
+   #selections['HH(#kappa_{l}=0.95)'].append(selection2 + ptstr)
    selections['HH(#kappa_{l}=1.00)'].append(selection2 + ptstr)
-   selections['HH(#kappa_{l}=1.05)'].append(selection2 + ptstr)
-   selections['HH(#kappa_{l}=1.10)'].append(selection2 + ptstr)
-   selections['HH(#kappa_{l}=1.50)'].append(selection2 + ptstr)
+   #selections['HH(#kappa_{l}=1.05)'].append(selection2 + ptstr)
+   #selections['HH(#kappa_{l}=1.10)'].append(selection2 + ptstr)
+   #selections['HH(#kappa_{l}=1.50)'].append(selection2 + ptstr)
    selections['HH(#kappa_{l}=2.00)'].append(selection2 + ptstr)
 
 

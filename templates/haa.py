@@ -5,7 +5,7 @@ import collections
 variables = {
     "pth":{"name":"higgs_pt","title":"p_{T}^{H} [GeV]","bin":100,"xmin":0,"xmax":1000},
     "pthl":{"name":"higgs_pt","title":"p_{T}^{H} [GeV]","bin":100,"xmin":0,"xmax":5000},
-    "mh":{"name":"higgs_m","title":"m_{H} [GeV]","bin":50,"xmin":110,"xmax":140},
+    "mh":{"name":"higgs_m","title":"m_{H} [GeV]","bin":100,"xmin":110,"xmax":140},
     "mhl":{"name":"higgs_m","title":"m_{H} [GeV]","bin":100,"xmin":50,"xmax":500},
     "pta1":{"name":"a1_pt","title":"p_{T}^{max}(#gamma) [GeV]","bin":100,"xmin":0,"xmax":1000},
     "pta2":{"name":"a2_pt","title":"p_{T}^{min}(#gamma) [GeV]","bin":100,"xmin":0,"xmax":1000},
@@ -22,29 +22,29 @@ colors['pp #rightarrow #gamma#gamma'] = ROOT.kYellow
 colors['gg #rightarrow #gamma#gamma'] = ROOT.kOrange
 
 signal_groups = collections.OrderedDict()
-signal_groups['H(125)'] = ['mgp8_pp_h012j_5f_haa', 'mgp8_pp_vbf_h01j_5f_haa', 'mgp8_pp_tth01j_5f_haa', 'mgp8_pp_vh012j_5f_haa']
+signal_groups['H(125)'] = ['pp_h012j_5f_haa', 'pp_vbf_h01j_5f_haa', 'pp_tth01j_5f_haa', 'pp_vh012j_5f_haa']
 
 
 
 background_groups = collections.OrderedDict()
 #background_groups['gg #rightarrow #gamma#gamma'] = ['gg_aa01j_mhcut_5f']
-#background_groups['pp #rightarrow #gamma#gamma'] = ['mgp8_pp_aa012j_mhcut_5f']
+#background_groups['pp #rightarrow #gamma#gamma'] = ['pp_aa012j_mhcut_5f']
 
 background_groups['gg #rightarrow #gamma#gamma'] = [
-						     'mgp8_gg_aa01j_mhcut_5f_HT_0_200',
-						     'mgp8_gg_aa01j_mhcut_5f_HT_200_500',
-						     'mgp8_gg_aa01j_mhcut_5f_HT_500_100000',
+						     'gg_aa01j_mhcut_5f_HT_0_200',
+						     'gg_aa01j_mhcut_5f_HT_200_500',
+						     'gg_aa01j_mhcut_5f_HT_500_100000',
 						    ]
 
 
 background_groups['pp #rightarrow #gamma#gamma'] = [
-                                                     'mgp8_pp_aa012j_mhcut_5f_HT_0_100',
-                                                     'mgp8_pp_aa012j_mhcut_5f_HT_100_300',
-                                                     'mgp8_pp_aa012j_mhcut_5f_HT_1100_100000',
-                                                     'mgp8_pp_aa012j_mhcut_5f_HT_300_500',
-                                                     'mgp8_pp_aa012j_mhcut_5f_HT_500_700',
-                                                     'mgp8_pp_aa012j_mhcut_5f_HT_700_900',
-                                                     'mgp8_pp_aa012j_mhcut_5f_HT_900_1100',
+                                                     'pp_aa012j_mhcut_5f_HT_0_100',
+                                                     'pp_aa012j_mhcut_5f_HT_100_300',
+                                                     'pp_aa012j_mhcut_5f_HT_1100_100000',
+                                                     'pp_aa012j_mhcut_5f_HT_300_500',
+                                                     'pp_aa012j_mhcut_5f_HT_500_700',
+                                                     'pp_aa012j_mhcut_5f_HT_700_900',
+                                                     'pp_aa012j_mhcut_5f_HT_900_1100',
                                                     ]
 
 
@@ -80,7 +80,7 @@ selections['H(125)'].append(selbase_nomasscut)
 selections['H(125)'].append(selbase_masscut)
 
 selections_pt = []
-for i in range(40):
+for i in range(20):
    pt = 0. + i*25.
    ptstr = ' && higgs_pt > {}'.format(pt)
    masscut = ' && abs(higgs_m - 125.) < 2.5 + higgs_pt/200.'

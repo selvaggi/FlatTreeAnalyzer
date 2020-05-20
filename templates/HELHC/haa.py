@@ -22,7 +22,11 @@ colors['pp #rightarrow #gamma#gamma'] = ROOT.kYellow
 colors['gg #rightarrow #gamma#gamma'] = ROOT.kOrange
 
 signal_groups = collections.OrderedDict()
-signal_groups['H(125)'] = ['mgp8_pp_h012j_5f_haa', 'mgp8_pp_vbf_h01j_5f_haa', 'mgp8_pp_tth01j_5f_haa', 'mgp8_pp_vh012j_5f_haa']
+signal_groups['H(125)'] = ['mgp8_pp_h012j_5f_HT_0_27000_haa', 
+                           'mgp8_pp_vbf_h01j_5f_HT_0_27000_haa', 
+                           'mgp8_pp_tth01j_5f_HT_0_27000_haa', 
+                           #'mgp8_pp_vh012j_5f_HT_0_27000_haa'
+                           ]
 
 
 
@@ -31,28 +35,19 @@ background_groups = collections.OrderedDict()
 #background_groups['pp #rightarrow #gamma#gamma'] = ['mgp8_pp_aa012j_mhcut_5f']
 
 background_groups['gg #rightarrow #gamma#gamma'] = [
-						     'mgp8_gg_aa01j_mhcut_5f_HT_0_200',
-						     'mgp8_gg_aa01j_mhcut_5f_HT_200_500',
-						     'mgp8_gg_aa01j_mhcut_5f_HT_500_100000',
-						    ]
-
-
+                                                     'mgp8_gg_aa01j_5f_HT_0_200',
+                                                     'mgp8_gg_aa01j_5f_HT_200_600',
+                                                     'mgp8_gg_aa01j_5f_HT_600_27000',
+                                                   ]
 background_groups['pp #rightarrow #gamma#gamma'] = [
-                                                     'mgp8_pp_aa012j_mhcut_5f_HT_0_100',
-                                                     'mgp8_pp_aa012j_mhcut_5f_HT_100_300',
-                                                     'mgp8_pp_aa012j_mhcut_5f_HT_1100_100000',
-                                                     'mgp8_pp_aa012j_mhcut_5f_HT_300_500',
-                                                     'mgp8_pp_aa012j_mhcut_5f_HT_500_700',
-                                                     'mgp8_pp_aa012j_mhcut_5f_HT_700_900',
-                                                     'mgp8_pp_aa012j_mhcut_5f_HT_900_1100',
+                                                     'mgp8_pp_aa012j_5f_HT_0_200',
+                                                     'mgp8_pp_aa012j_5f_HT_200_600',
+                                                     'mgp8_pp_aa012j_5f_HT_600_27000',
                                                     ]
 
 
-
-
-
 # global parameters
-intLumi = 30000000
+intLumi = 15000000
 delphesVersion = '3.4.2'
 
 ### signal and background uncertainties hypothesis
@@ -80,8 +75,8 @@ selections['H(125)'].append(selbase_nomasscut)
 selections['H(125)'].append(selbase_masscut)
 
 selections_pt = []
-for i in range(40):
-   pt = 0. + i*25.
+for i in range(20):
+   pt = 50. + i*25.
    ptstr = ' && higgs_pt > {}'.format(pt)
    masscut = ' && abs(higgs_m - 125.) < 2.5 + higgs_pt/200.'
    selections['H(125)'].append(selbase_nomasscut + ptstr)

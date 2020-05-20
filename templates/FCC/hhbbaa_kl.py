@@ -1,6 +1,9 @@
 import ROOT
 import collections
 
+
+kl_list=['000','040','070','100','130','150','170','200','220','240','260','300']
+
 '''
 "pta1":{"name":"a1_pt","title":"p_{T}^{max}(#gamma) [GeV]","bin":50,"xmin":20.0,"xmax":400.0},
 "pta2":{"name":"a2_pt","title":"p_{T}^{min}(#gamma) [GeV]","bin":50,"xmin":20.0,"xmax":200.0},
@@ -37,13 +40,14 @@ variables = {
     "pthbb":{"name":"hbb_pt","title":"p_{T}(h #rightarrow b b) [GeV]","bin":50,"xmin":0.0,"xmax":500.0},
     "draa":{"name":"draa","title":"#Delta R (#gamma_{1},#gamma_{2})","bin":50,"xmin":0.0,"xmax":6.00},
     "drbb":{"name":"drbb","title":"#Delta R (b_{1},b_{2})","bin":50,"xmin":0.0,"xmax":6.00},
-    "tmva_bdt_qcd":{"name":"tmva_bdt_qcd","title":"BDT_{QCD}","bin":50,"xmin":-1,"xmax":1.},
-    "tmva_bdt_singleh":{"name":"tmva_bdt_singleh","title":"BDT_{H}","bin":50,"xmin":-1,"xmax":1.},
-
 }
 
-variables2D = {
-    
+for kl in kl_list:
+    variables["tmva_bdt_qcd_{}".format(kl)] = {"name":"tmva_bdt_qcd_{}".format(kl),"title":"BDT_{QCD}","bin":50,"xmin":-1,"xmax":1.}
+    variables["tmva_bdt_singleh_{}".format(kl)] = {"name":"tmva_bdt_singleh_{}".format(kl),"title":"BDT_{QCD}","bin":50,"xmin":-1,"xmax":1.}
+
+
+variables2D = {    
     "hmaa_mbb":{ 
                   "namex":"haa_m","namey":"hbb_m","titlex":"m_{#gamma #gamma} [GeV]","titley":"m_{j j} [GeV]",
                   "binx":50,"xmin":120.0,"xmax":130.0,"biny":50,"ymin":80.0,"ymax":140.0
@@ -53,18 +57,20 @@ variables2D = {
                   "namex":"haa_m","namey":"hh_m","titlex":"m_{#gamma #gamma} [GeV]","titley":"m_{h h} [GeV]",
                   "binx":50,"xmin":120.0,"xmax":130.0,"biny":75,"ymin":240.0,"ymax":1500.0
                },
-
-    "bdth_bdtqcd":{ 
-                  "namex":"tmva_bdt_singleh","namey":"tmva_bdt_qcd","titlex":"BDT_{H}","titley":"BDT_{QCD}",
-                  "binx":25,"xmin":-0.4,"xmax":0.55,"biny":25,"ymin":0.0,"ymax":0.7
-               },
-
 }
-'''
+
+
+for kl in kl_list:
+    variables2D["bdth_bdtqcd_{}".format(kl)] = { 
+                  "namex":"tmva_bdt_singleh_{}".format(kl),"namey":"tmva_bdt_qcd_{}".format(kl),"titlex":"BDT_{H}","titley":"BDT_{QCD}",
+                  "binx":50,"xmin":-1.0,"xmax":1.0,"biny":50,"ymin":-1.0,"ymax":1.0
+               }
+
+
 kls = [
        0.00,
        0.20,
-       #0.40,
+       0.40,
        0.60,
        0.70,
        0.80,
@@ -101,12 +107,12 @@ kls = [
        2.80,
        3.00
        ]
-'''
 
+'''
 kls = [
        1.00, 
       ]
-
+'''
 
 colors = {}
 for k in kls:
@@ -226,10 +232,11 @@ sel7 += ' && tmva_bdt_singleh > 0.1 && tmva_bdt_qcd > 0.4'
 '''
 
 selection.append(sel0)
-selection.append(sel1)
-selection.append(sel2)
-selection.append(sel3)
-selection.append(sel4)
+
+#selection.append(sel1)
+#selection.append(sel2)
+#selection.append(sel3)
+#selection.append(sel4)
 '''
 selection.append(sel5)
 selection.append(sel6)

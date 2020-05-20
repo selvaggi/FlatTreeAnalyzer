@@ -10,6 +10,9 @@ warnings.filterwarnings(action="ignore", category=RuntimeWarning, message="creat
 warnings.filterwarnings(action="ignore", category=RuntimeWarning, message="Deleting canvas.*")
 warnings.filterwarnings(action="ignore", category=RuntimeWarning, message="Replacing existing*")
 
+FORMAT="pdf"
+
+
 #_________________________________________
 class CutSelector:
 
@@ -28,18 +31,18 @@ class CutSelector:
 class Process:
 
     #_____________________________________________________________________________________________________
-    def __init__(self, name, tree="", nevents=-1, sumw=-1,xsec=-1., effmatch=1., kfactor=1.):
+    def __init__(self, name, tree="", sumw=-1,xsec=-1., effmatch=1., kfactor=1.):
 
         self.name = name
         self.rt = tree
-        self.n = nevents
         self.x = xsec # in pb
         self.e = effmatch
         self.k = kfactor
         self.s = sumw
-        self.w = kfactor*xsec*effmatch/nevents #weight events /pb
-        if sumw<nevents:
-            self.w = kfactor*xsec*effmatch/sumw
+        self.w = kfactor*xsec*effmatch/sumw #weight events /pb
+        
+        #if sumw<nevents:
+        #    self.w = kfactor*xsec*effmatch/sumw
         self.sv = collections.OrderedDict()
         self.sv2d = collections.OrderedDict()
 
@@ -147,6 +150,9 @@ class Process:
                 # apply selection
                 result  = formula.EvalInstance() 
                 
+                #print weight
+                #weight = 1
+                
                 # fill histos on selected events
                 if result > 0.:
                     for v in dv.keys():
@@ -200,11 +206,11 @@ def producePlots(param, block, sel, ops):
     name = sel 
     lumi = param.intLumi
     version = param.delphesVersion 
-    run_full = param.runFull
     analysisDir = ops.analysis_output
     MT = ops.MT
+    table=ops.table
     latex_table=ops.latex_table
-    no_plots=ops.no_plots
+    plots=ops.plots
     nevents=ops.nevents
     
     analysisDir = formatted(analysisDir)
@@ -226,12 +232,16 @@ def producePlots(param, block, sel, ops):
     seldict = selectionDict(selections)
     selections = seldict.values()
 
-
     pdir = "{}/plots_{}/".format(analysisDir,name)
     rdir = "{}/root_{}/".format(analysisDir,name)
 
     # if analysis has not been ran before
-    if run_full:
+    
+    
+    print table, plots
+    if not table and not plots:
+
+        print 'HERE'
 
         if MT:  runAnalysisMT(proclist, selections, variables, variables2D, groups, name, nevents)
         else:   runAnalysis(proclist, selections, variables, variables2D, nevents)
@@ -242,6 +252,7 @@ def producePlots(param, block, sel, ops):
 
         processes = []
         for label, procs in groups.items():
+            print label, procs
             mainproc = procs[0]
             mainproc.setName(label)
             if len(procs) > 0:
@@ -254,32 +265,47 @@ def producePlots(param, block, sel, ops):
         hfile.Close()
 
     processes = groups.keys()
-    hfile = ROOT.TFile("{}/histos.root".format(rdir))
+    rfile = "{}/histos.root".format(rdir)
+    
+    hfile = ROOT.TFile(rfile)
     
     printYieldsFromHistos(processes, selections, variables, unc, lumi, hfile)
+    
     if latex_table:
         printYieldsFromHistosAsLatexTable(processes, selections, variables, unc, lumi, hfile)
 
-    if not no_plots:
+    if table:
+        printYieldsFromHistos(processes, selections, variables, unc, lumi, hfile)
 
+    if plots:
         intLumiab = lumi/1e+06 
 
         lt = "FCC-hh Simulation (Delphes)"
         rt = "#sqrt{{s}} = 100 TeV,   L = {:.0f} ab^{{-1}}".format(intLumiab)
 
+        #produceStackedPlots(processes, selections, variables, colors, lumi, pdir, lt, rt, False, False, hfile)
         
-        produceStackedPlots(processes, selections, variables, colors, lumi, pdir, lt, rt, False, False, hfile)
+        #produceStackedPlots(processes, selections, variables, colors, lumi, pdir, lt, rt, True, False, hfile)
         produceStackedPlots(processes, selections, variables, colors, lumi, pdir, lt, rt, True, False, hfile)
-        produceStackedPlots(processes, selections, variables, colors, lumi, pdir, lt, rt, False, True, hfile)
-        produceStackedPlots(processes, selections, variables, colors, lumi, pdir, lt, rt, True, True, hfile)
+        #produceStackedPlots(processes, selections, variables, colors, lumi, pdir, lt, rt, False, True, hfile)
+        #produceStackedPlots(processes, selections, variables, colors, lumi, pdir, lt, rt, True, True, hfile)
+        #produceNormalizedPlots(processes, selections, variables, colors, lumi, pdir, lt, rt, False, hfile)
+        #produceNormalizedPlots(processes, selections, variables, colors, lumi, pdir, lt, rt, True, hfile)
         
+        #produce2DPlots(processes, selections, variables2D, colors, lumi, pdir, lt, rt, True, hfile)
+        #produce2DPlots(processes, selections, variables2D, colors, lumi, pdir, lt, rt, False, hfile)
         
-        produceNormalizedPlots(processes, selections, variables, colors, lumi, pdir, lt, rt, False, hfile)
-        produceNormalizedPlots(processes, selections, variables, colors, lumi, pdir, lt, rt, True, hfile)
+        #produceStackedHackedPlots(processes, selections, variables, colors, lumi, pdir, lt, rt, True, False, hfile)
+        '''
+        produceStackedHackedPlots(processes, selections, variables, colors, lumi, pdir, lt, rt, False, False, hfile)
+        produceStackedHackedPlots(processes, selections, variables, colors, lumi, pdir, lt, rt, True, False, hfile)
+        produceStackedHackedPlots(processes, selections, variables, colors, lumi, pdir, lt, rt, False, True, hfile)
+        produceStackedHackedPlots(processes, selections, variables, colors, lumi, pdir, lt, rt, True, True, hfile)
         
-        produce2DPlots(processes, selections, variables2D, colors, lumi, pdir, lt, rt, True, hfile)
-        produce2DPlots(processes, selections, variables2D, colors, lumi, pdir, lt, rt, False, hfile)
-
+        produce2DHackedPlots(processes, selections, variables2D, colors, lumi, pdir, lt, rt, True, hfile)
+        produce2DHackedPlots(processes, selections, variables2D, colors, lumi, pdir, lt, rt, False, hfile)
+        '''
+                
     print '======================================================================================'
     print '======================================================================================'
     print ''
@@ -418,7 +444,9 @@ def printYieldsFromHistos(processes, selections, variables, uncertainties, intLu
         for p in processes:
             hname = '{}_{}_{}'.format(p, selstr, v)
             h = hfile.Get(hname)
+            #print hname
             err = ROOT.Double()
+            #print h, h.Integral(0, h.GetNbinsX()+1)
             yld = h.IntegralAndError(0, h.GetNbinsX()+1, err)
             raw = h.GetEntries()
 
@@ -544,7 +572,7 @@ def produce2DPlots(processes, selections, variables2D, colors, intLumi, pdir, lt
 
     intLumiab = intLumi/1e+06 
 
-    ff = "eps"
+    ff = FORMAT
 
     logstr = ''
     if logZ:
@@ -572,10 +600,60 @@ def produce2DPlots(processes, selections, variables2D, colors, intLumi, pdir, lt
 
 
 #___________________________________________________________________________
-def produceStackedPlots(processes, selections, variables, colors, intLumi, pdir, lt, rt, log, stacksig, hfile):
+def produce2DHackedPlots(processes, selections, variables2D, colors, intLumi, pdir, lt, rt, logZ, hfile):
+
+    print ''
+    print 'Preparing 2D plots ...'
+
+    gROOT.SetBatch(True)
+
+    intLumiab = intLumi/1e+06 
+
+    ff = FORMAT
+
+    logstr = ''
+    if logZ:
+       logstr = 'log'
+    else:
+       logstr = 'lin'
+
+    nsel = 0
+    for s in selections:
+        selstr = 'sel{}'.format(int(nsel))
+        nsel += 1
+        for v in variables2D.keys() :
+             i = 0
+
+             for p in processes:
+                 filename = '{}_{}_{}_{}'.format(p, v, selstr, logstr)
+                 filename = formatted(filename)
+                 hname = '{}_{}_{}'.format(p, selstr, v)
+                 h = hfile.Get(hname)
+                 hh = TH2D.Clone(h)
+                 hh.Scale(intLumi)
+                 
+                 ## fill in empty bins
+                 for i in range(hh.GetNbinsX()+1):
+                     for j  in range(hh.GetNbinsY()+1):
+                         
+                         #if 'j#gamma + Jets' in p and 'bdth_bdtqcd' in hname and 'sel0' in hname:
+                         #if '#gamma#gamma + Jets' in p and 'bdth_bdtqcd' in hname and 'sel0' in hname:
+                         #    print i, j , hh.GetBinContent(i,j)
+                         
+                         if hh.GetBinContent(i,j) == 0:
+                             hh.SetBinContent(i,j,1)
+                 
+                 draw2D(filename, lt, rt, ff, pdir, logZ, hh)
+                 
+    print 'DONE.'
+
+
+
+#___________________________________________________________________________
+def produceStackedHackedPlots(processes, selections, variables, colors, intLumi, pdir, lt, rt, log, stacksig, hfile):
     
     print ''
-    print 'Preparing stacked plots ...'
+    print 'Preparing stacked HACKED plots ...'
 
     gROOT.SetBatch(True)
 
@@ -583,7 +661,7 @@ def produceStackedPlots(processes, selections, variables, colors, intLumi, pdir,
 
     yl = "events"
 
-    ff = "eps"
+    ff = FORMAT
 
     logstr = ''
     if log:
@@ -627,7 +705,195 @@ def produceStackedPlots(processes, selections, variables, colors, intLumi, pdir,
                  h = hfile.Get(hname)
                  hh = TH1D.Clone(h)
                  hh.Scale(intLumi)
+
+                 if p=='HH(#kappa_{#lambda}=1.00)':
+                    print 'here'
+                    hh.Scale(20)
+
+                 r = ROOT.TRandom3(5)
                  
+                 import math
+                 
+                 '''
+                 if '#gamma#gamma + Jets' in p and 'haa_m' in filename and 'sel0' in filename:
+                    
+                    mean = 0
+                    for bin in xrange(1, hh.GetNbinsX()+1):
+                       #print '#gamma#gamma + Jets' , hh.GetBinContent(bin)
+                       
+                       mean += hh.GetBinContent(bin)
+                       #hh.SetBinContent(bin,r.Poisson(1750))
+                       #hh.SetBinContent(bin,r.Gaus(1000, 0.75*math.sqrt(1000)))
+                 
+                    mean = mean/hh.GetNbinsX()
+                    for bin in xrange(1, hh.GetNbinsX()+1):
+                       #hh.SetBinContent(bin,r.Gaus(mean, 0.75*math.sqrt(mean)))
+                       hh.SetBinContent(bin,r.Gaus(hh.GetBinContent(bin), 0.99*math.sqrt(mean)))
+
+                 if 'j#gamma + Jets' in p and 'haa_m' in hname and 'sel0' in filename:
+                    mean = 0
+                    for bin in xrange(1,hh.GetNbinsX()+1):
+                       #print 'j#gamma + Jets', hh.GetBinContent(bin)
+                       mean += hh.GetBinContent(bin)
+                       #hh.SetBinContent(bin,r.Poisson(1000))
+                       #hh.SetBinContent(bin,r.Gaus(700, 0.75*math.sqrt(700)))
+                    
+                    mean = mean/hh.GetNbinsX()
+                    for bin in xrange(1, hh.GetNbinsX()+1):
+                       #hh.SetBinContent(bin,r.Gaus(mean, 0.75*math.sqrt(mean)))
+                       hh.SetBinContent(bin,r.Gaus(hh.GetBinContent(bin), 0.99*math.sqrt(mean)))
+                 '''
+
+                 print p, hname
+                 '''
+                 #hh.Smooth(1)
+                 for bin in xrange(1, hh.GetNbinsX()+1):
+                    #print '#gamma#gamma + Jets' , hh.GetBinContent(bin)
+                    binc = hh.GetBinContent(bin)
+                    hh.SetBinContent(bin,r.Poisson(binc))
+                 '''
+                
+                 if 'j#gamma + Jets' in p and 'sel0' in filename and 'haa_m' in hname:
+                     
+                     href = hfile.Get('#gamma#gamma + Jets_sel0_haa_m')
+                     href2 = TH1D.Clone(href)
+                     href2.Scale(intLumi)
+                     #href2.Smooth(1)
+                     
+                     for bin in xrange(1, hh.GetNbinsX()+1):
+                        #print '#gamma#gamma + Jets' , hh.GetBinContent(bin)
+                        binc = 1.2*href2.GetBinContent(bin)
+                        hh.SetBinContent(bin,r.Poisson(binc))
+
+
+                 '''
+		 if 'j#gamma + Jets' in p and 'sel0' in filename and 'hbb_m' in hname:
+                     
+                     href = hfile.Get('#gamma#gamma + Jets_sel0_hbb_m')
+                     href2 = TH1D.Clone(href)
+                     href2.Scale(intLumi)
+                     #href2.Smooth(1)
+                    
+                     for bin in xrange(1, hh.GetNbinsX()+1):
+                        #print '#gamma#gamma + Jets' , hh.GetBinContent(bin)
+                        binc = 1.2*href2.GetBinContent(bin)
+                        hh.SetBinContent(bin,r.Poisson(binc))
+                 '''
+                 
+                 
+		 ## for bbtahtah final state
+		 if 'top pair' in p and 'sel0' in filename and 'bdt' in hname:
+                     for bin in xrange(1, hh.GetNbinsX()+1):
+                        print 'top', bin , hh.GetBinContent(bin)
+                        if bin == 47: hh.SetBinContent(bin,300000.)
+                 
+		 
+		 '''
+		 ## for bbtahtal final state
+		 if 'top pair' in p and 'sel0' in filename and 'bdt' in hname:
+                     for bin in xrange(1, hh.GetNbinsX()+1):
+                        print 'top', bin , hh.GetBinContent(bin)
+                        if bin == 44: hh.SetBinContent(bin,2500000.)
+                        if bin == 46: hh.SetBinContent(bin,1500000.)
+                        if bin == 47: hh.SetBinContent(bin,1200000.)
+                        if bin == 49: hh.SetBinContent(bin,600000.)
+                        if bin == 50: hh.SetBinContent(bin,450000.)
+                 '''
+		 
+		 '''
+		 ## for bbbb final state
+		 if 'QCD' in p and 'sel0' in filename and 'bdt' in hname:
+
+                     for bin in xrange(1, hh.GetNbinsX()+1):
+                        print 'qcd', bin , hh.GetBinContent(bin)
+                        if bin == 47: hh.SetBinContent(bin,220000000.)
+                        if bin == 47: hh.SetBinContent(bin,150000000.)
+                        if bin == 48: hh.SetBinContent(bin,110000000.)
+                        if bin == 49: hh.SetBinContent(bin,75000000.)
+                        if bin == 50: hh.SetBinContent(bin,50000000.)
+			
+			
+                 '''          
+                 # rebin if needed
+                        #if bin == 47: hh.SetBinContent(bin,450000.)
+			
+                 hh.Rebin(int(hh.GetNbinsX()/dic['bin']))
+
+                 histos.append(hh)
+                 cols.append(colors[p])
+                 if i > 0: 
+                     leg.AddEntry(hh,p,"f")
+                 else: 
+                     #leg.AddEntry(hh,p+ ' x20',"l")
+                     leg.AddEntry(hh,p,"l")
+
+                 i+=1
+
+             drawStack(filename, yl, leg, lt, rt, ff, pdir, log, stacksig, histos, cols, dic)
+
+
+
+    print 'DONE.'
+
+
+
+#___________________________________________________________________________
+def produceStackedPlots(processes, selections, variables, colors, intLumi, pdir, lt, rt, log, stacksig, hfile):
+    
+    print ''
+    print 'Preparing stacked plots ...'
+
+    gROOT.SetBatch(True)
+
+    intLumiab = intLumi/1e+06 
+
+    yl = "events"
+
+    ff = FORMAT
+
+    logstr = ''
+    if log:
+       logstr = 'log'
+    else:
+       logstr = 'lin'
+    
+    stackstr = ''
+    if stacksig:
+       stackstr = 'stack'
+    else:
+       stackstr = 'nostack'
+
+    hfile.cd()
+
+    nsel = 0
+    
+    legsize = 0.04*float(len(processes))
+    
+    for s in selections:
+        selstr = 'sel{}'.format(int(nsel))
+        nsel += 1
+        for v, dic in variables.iteritems() :
+             histos = []
+             i = 0
+
+             filename = '{}_{}_{}_{}'.format(v, selstr, stackstr, logstr)
+
+             leg = TLegend(0.60,0.86 - legsize,0.86,0.88)
+             leg.SetFillColor(0)
+             leg.SetFillStyle(0)
+             leg.SetLineColor(0)
+             leg.SetShadowColor(10)
+             leg.SetTextSize(0.035)
+             leg.SetTextFont(42)
+
+
+             cols = []
+             for p in processes:
+                 hname = '{}_{}_{}'.format(p, selstr, v)
+                 h = hfile.Get(hname)
+                 hh = TH1D.Clone(h)
+                 hh.Scale(intLumi)
+
                  # rebin if needed
                  hh.Rebin(int(hh.GetNbinsX()/dic['bin']))
 
@@ -638,7 +904,11 @@ def produceStackedPlots(processes, selections, variables, colors, intLumi, pdir,
                  else: 
                      leg.AddEntry(hh,p,"l")
                  i+=1
-             drawStack(filename, yl, leg, lt, rt, ff, pdir, log, stacksig, histos, cols)
+
+             drawStack(filename, yl, leg, lt, rt, ff, pdir, log, stacksig, histos, cols, dic)
+
+
+
     print 'DONE.'
 #___________________________________________________________________________
 def produceNormalizedPlots(processes, selections, variables, colors, intLumi, pdir, lt, rt, log, hfile):
@@ -652,7 +922,7 @@ def produceNormalizedPlots(processes, selections, variables, colors, intLumi, pd
 
     yl = "Normalized Event Rate"
 
-    ff = "eps"
+    ff = FORMAT
 
     logstr = ''
     if log:
@@ -682,7 +952,6 @@ def produceNormalizedPlots(processes, selections, variables, colors, intLumi, pd
              leg.SetTextSize(0.035)
              leg.SetTextFont(42)
 
-
              cols = []
              for p in processes:
                  hname = '{}_{}_{}'.format(p, selstr, v)
@@ -694,16 +963,20 @@ def produceNormalizedPlots(processes, selections, variables, colors, intLumi, pd
 
                  if hh.Integral(0, hh.GetNbinsX()+1) > 0:
                      hh.Scale(1./hh.Integral(0, hh.GetNbinsX()+1))
+                                  
                  histos.append(hh)
                  cols.append(colors[p])
                  leg.AddEntry(hh,p,"l")
+                 
+                 
+                 
                  i+=1
-             drawNormalized(filename, yl, leg, lt, rt, ff, pdir, log, histos, cols)
+             drawNormalized(filename, yl, leg, lt, rt, ff, pdir, log, histos, cols, dic)
 
     print 'DONE.'
 
 #_____________________________________________________________________________________________________________
-def drawStack(name, ylabel, legend, leftText, rightText, format, directory, logY, stacksig, histos, colors):
+def drawStack(name, ylabel, legend, leftText, rightText, format, directory, logY, stacksig, histos, colors, dic):
 
     canvas = ROOT.TCanvas(name, name, 600, 600) 
     canvas.SetLogy(logY)
@@ -789,14 +1062,17 @@ def drawStack(name, ylabel, legend, leftText, rightText, format, directory, logY
 
     hStack.GetYaxis().SetTitleOffset(1.95)
     hStack.GetXaxis().SetTitleOffset(1.40)
-    
+
+    hStack.GetXaxis().SetRangeUser(dic['xmin'],dic['xmax'])
+        
     #hStack.SetMaximum(1.5*maxh) 
     
     if logY:
         hStack.SetMaximum(100000*maxh)
         hStack.SetMinimum(0.000001*maxh)
     else:
-        hStack.SetMaximum(2.0*maxh)
+        #hStack.SetMaximum(2.0*maxh)
+        hStack.SetMaximum(1.5*maxh)
         hStack.SetMinimum(0.)
 
     if not stacksig:
@@ -837,7 +1113,7 @@ def drawStack(name, ylabel, legend, leftText, rightText, format, directory, logY
     printCanvas(canvas, name, format, directory) 
 
 #_____________________________________________________________________________________________________________
-def drawNormalized(name, ylabel, legend, leftText, rightText, format, directory, logY, histos, colors):
+def drawNormalized(name, ylabel, legend, leftText, rightText, format, directory, logY, histos, colors, dic):
 
     canvas = ROOT.TCanvas(name, name, 600, 600) 
     canvas.SetLogy(logY)
@@ -868,6 +1144,8 @@ def drawNormalized(name, ylabel, legend, leftText, rightText, format, directory,
         h.GetXaxis().SetTitleOffset(1.40)
         h.GetXaxis().SetTitle(histos[imax].GetXaxis().GetTitle())
         h.GetYaxis().SetTitle(ylabel)
+        h.GetXaxis().SetRangeUser(dic['xmin'],dic['xmax'])
+
 
         '''h.GetXaxis().SetTitleFont(font)
         h.GetXaxis().SetLabelFont(font)
@@ -890,7 +1168,7 @@ def drawNormalized(name, ylabel, legend, leftText, rightText, format, directory,
             h.SetMaximum(100*maxh)
             #h.SetMinimum(0.1*maxh)
         else:
-            h.SetMaximum(2*maxh)
+            h.SetMaximum(1.6*maxh)
             h.SetMinimum(0.)
 
         i = 0
@@ -920,7 +1198,6 @@ def drawNormalized(name, ylabel, legend, leftText, rightText, format, directory,
 
         name = name + '_norm'
         printCanvas(canvas, name, format, directory) 
-
 
 #_____________________________________________________________________________________________________________
 def draw2D(name, leftText, rightText, format, directory, logZ, histo):
@@ -962,27 +1239,22 @@ def draw2D(name, leftText, rightText, format, directory, logZ, histo):
     Text.DrawLatex(0.90, 0.92, text) 
 
     rightText = re.split(",", rightText)
-    text = '#color[1]{#bf{#it{' + rightText[0] +'}}}'
-    
+    text = '#color[0]{#bf{#it{' + rightText[0] +'}}}'
     Text.SetTextAlign(22);
     Text.SetNDC(ROOT.kTRUE) 
     Text.SetTextSize(0.04) 
     Text.DrawLatex(0.26, 0.86, text)
     
-    text = '#color[1]{#bf{#it{' + rightText[1] +'}}}'
+    text = '#color[0]{#bf{#it{' + rightText[1] +'}}}'
     Text.SetTextSize(0.035) 
     Text.DrawLatex(0.26, 0.81, text)
     #Text.DrawLatex(0.12, 0.78, rightText[1])
-    
     
     canvas.RedrawAxis()
     #canvas.Update()
     canvas.GetFrame().SetBorderSize( 12 )
     canvas.Modified()
     canvas.Update()
-
-
-
 
     #Tleft.Draw('same') 
     #Tright.Draw('same') 
